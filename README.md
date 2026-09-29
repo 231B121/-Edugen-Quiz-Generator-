@@ -4,6 +4,7 @@
 ![Framework](https://img.shields.io/badge/Framework-Flask-black?logo=flask)
 ![NLP](https://img.shields.io/badge/NLP-HuggingFace%20Transformers-orange?logo=huggingface)
 ![Model](https://img.shields.io/badge/Model-T5--small--qg--hl-green)
+![Tests](https://img.shields.io/badge/Tests-Passing-brightgreen?logo=pytest)
 ![License](https://img.shields.io/badge/License-MIT-purple)
 
 **EDUGEN** is an intelligent academic question and quiz generation platform powered by Deep Learning and Natural Language Processing (NLP). It automatically transforms raw text, textbook chapters, lecture notes, and multi-page PDF documents into comprehensive, answer-aware quizzes and multiple-choice questions (MCQs).
@@ -18,8 +19,11 @@ Designed with a formal, professional academic interface for educators, researche
 - [Tech Stack](#-tech-stack)
 - [Project Structure](#-project-structure)
 - [Quick Start Guide](#-quick-start-guide)
+- [Running Unit Tests](#-running-unit-tests)
+- [Cloud Deployment](#-cloud-deployment)
 - [API Reference](#-api-reference)
 - [Export & Quiz Modes](#-export--quiz-modes)
+- [Frequently Asked Questions](#-frequently-asked-questions)
 - [Author](#-author)
 - [License](#-license)
 
@@ -96,8 +100,12 @@ Designed with a formal, professional academic interface for educators, researche
 -Edugen-Quiz-Generator-/
 ├── app.py              # Main Flask server, API routes & model inference
 ├── utils.py            # PDF parser, candidate answer miner & distractor logic
+├── test_app.py         # Automated unit test suite
 ├── requirements.txt    # Project Python dependencies
+├── Procfile            # Cloud process configuration for Render/Railway/Heroku
+├── Dockerfile          # Production container recipe (Hugging Face Spaces)
 ├── .gitignore          # Git exclusion rules for clean version control
+├── LICENSE             # MIT License
 ├── README.md           # Project documentation and guide
 │
 ├── templates/
@@ -137,9 +145,9 @@ python app.py
 
 The application will start within seconds:
 ```text
-⏳ Loading AI model (valhalla/t5-small-qg-hl)... Please wait a moment...
-✅ Model loaded successfully on cpu!
-🚀 Starting Flask server at http://127.0.0.1:5000 ...
+⏳ Initializing AI model (valhalla/t5-small-qg-hl)... Please wait a moment...
+✅ AI Engine initialized successfully on cpu!
+🚀 Starting Flask server on port 5000...
 ```
 
 ### 5. Open in Your Browser
@@ -147,6 +155,40 @@ Navigate to:
 ```
 http://127.0.0.1:5000
 ```
+
+---
+
+## 🧪 Running Unit Tests
+
+EDUGEN includes an automated test suite verifying text sanitization, sentence boundary parsing, and MCQ distractor generation:
+
+```bash
+python3 test_app.py
+```
+
+Expected output:
+```text
+......
+----------------------------------------------------------------------
+Ran 6 tests in 0.010s
+
+OK
+```
+
+---
+
+## ☁️ Cloud Deployment
+
+### Option A: Hugging Face Spaces (Recommended · 16 GB RAM Free)
+1. Go to [huggingface.co/spaces](https://huggingface.co/spaces) and click **Create new Space**.
+2. Select **Docker** (Blank) as SDK.
+3. Connect your GitHub repository: `231B121/-Edugen-Quiz-Generator-`.
+4. Hugging Face builds the Docker container automatically on port `7860`.
+
+### Option B: Render.com
+1. Create a new **Web Service** connected to your repository.
+2. Build Command: `pip install -r requirements.txt`
+3. Start Command: `gunicorn app:app --bind 0.0.0.0:$PORT --timeout 180 --workers 1 --threads 2`
 
 ---
 
@@ -177,6 +219,7 @@ http://127.0.0.1:5000
     "meta": {
       "total_generated": 1,
       "word_count": 85,
+      "reading_time_mins": 1,
       "source": "Pasted Text",
       "difficulty": "medium"
     }
@@ -195,25 +238,30 @@ http://127.0.0.1:5000
     "filename": "lecture_notes.pdf",
     "page_count": 4,
     "word_count": 1240,
+    "reading_time_mins": 6,
     "preview": "Chapter 1: Principles of Computation..."
   }
   ```
 
 ---
 
-## 📑 Export & Quiz Modes
+## ❓ Frequently Asked Questions
 
-* **Interactive Quiz Mode:** Enables students to test their knowledge with live radio buttons, automatic grading, and instant performance feedback.
-* **Answer Key Mode:** Educators can review questions with answers and source contexts at a glance.
-* **PDF Worksheet Export:** Generates formatted, clean, printable test papers complete with student instructions and a detached answer key.
-* **Markdown & JSON:** Easily import questions into Notion, Google Docs, Canvas, Moodle, or custom LMS platforms.
+**Q: Can I use scanned PDFs?**  
+A: EDUGEN is designed for standard digital searchable PDFs. If your PDF contains scanned images without selectable text, run OCR before uploading.
+
+**Q: Does it work offline?**  
+A: Yes. Once the model weights (`valhalla/t5-small-qg-hl`) are cached locally in `~/.cache/huggingface/`, the application runs completely offline without requiring internet access.
+
+**Q: Can I specify custom answers?**  
+A: Yes. Wrap any phrase in `<hl>your term<hl>` in the text input box, and the model will prioritize generating a question targeting that exact term.
 
 ---
 
 ## 👨‍💻 Author
 
 **Gourav Ojha**  
-GitHub: [@231B121](https://github.com/231B121) / 
+GitHub: [@231B121](https://github.com/231B121) / [@gurjha14-lang](https://github.com/gurjha14-lang)
 
 ---
 
