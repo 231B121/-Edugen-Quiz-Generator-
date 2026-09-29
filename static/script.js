@@ -1,10 +1,18 @@
 /**
- * EDUGEN - Formal Academic Quiz & Question Generator
- * Clean, lightweight, professional controller.
+ * ==============================================================================
+ * EDUGEN - Formal Academic Quiz & Question Generator Controller
+ * ==============================================================================
+ * Client-side script orchestrating file drag-and-drop ingestion, real-time
+ * preview calls, asynchronous question generation, interactive quiz evaluation,
+ * and multi-format document exporting.
  */
 
 (function () {
-  // DOM Elements
+  "use strict";
+
+  // ============================================================================
+  // DOM References: Navigation & Source Material Inputs
+  // ============================================================================
   const tabText = document.getElementById("tab_text");
   const tabPdf = document.getElementById("tab_pdf");
   const textTabContent = document.getElementById("text_tab_content");
@@ -16,6 +24,9 @@
   const clearBtn = document.getElementById("clear_btn");
   const hlBtn = document.getElementById("hl_btn");
 
+  // ============================================================================
+  // DOM References: PDF Upload & Ingestion
+  // ============================================================================
   const pdfDropzone = document.getElementById("pdf_dropzone");
   const pdfFileInput = document.getElementById("pdf_file");
   const pdfInfoCard = document.getElementById("pdf_info_card");
@@ -24,11 +35,17 @@
   const pdfPreviewText = document.getElementById("pdf_preview_text");
   const removePdfBtn = document.getElementById("remove_pdf_btn");
 
+  // ============================================================================
+  // DOM References: Controls & Action Triggers
+  // ============================================================================
   const numQuestionsInput = document.getElementById("num_questions");
   const numBadge = document.getElementById("num_badge");
   const diffInput = document.getElementById("difficulty");
   const generateBtn = document.getElementById("generate_btn");
 
+  // ============================================================================
+  // DOM References: UI States & Results Output
+  // ============================================================================
   const emptyPlaceholder = document.getElementById("empty_placeholder");
   const loader = document.getElementById("loader");
   const errorBox = document.getElementById("error_box");
@@ -59,20 +76,26 @@
   const closeHelpBtn = document.getElementById("close_help_btn");
   const toastContainer = document.getElementById("toast_container");
 
-  // State
+  // ============================================================================
+  // Application State
+  // ============================================================================
   let currentQuestions = [];
   let currentMeta = null;
   let allAnswersVisible = false;
   let uploadedPdfFile = null;
 
-  // Sample texts
+  // Curated academic sample texts for quick evaluation
   const SAMPLES = {
     ai: `Artificial Intelligence was founded as an academic discipline in 1956. John McCarthy coined the term during the historic Dartmouth Conference. Machine Learning is a core branch of artificial intelligence that allows computational systems to learn patterns directly from empirical data without manual programming. In 2017, the Transformer architecture was introduced in the paper Attention Is All You Need, fundamentally advancing natural language processing and neural sequence modeling.`,
     solar: `The Solar System formed approximately 4.6 billion years ago from the gravitational collapse of a giant interstellar molecular cloud. The vast majority of the system's mass resides in the Sun, with most of the remaining mass concentrated within Jupiter. There are eight recognized planets in the solar system, with Mercury being the closest to the Sun and Neptune being the farthest. Earth is the only known celestial body in the universe that harbors liquid surface oceans and living organisms.`,
     history: `The Industrial Revolution began in Great Britain during the mid-18th century and rapidly transformed manufacturing and agricultural economies into mechanized, urban societies. James Watt developed significant mechanical improvements to the steam engine in 1769, dramatically enhancing its thermal efficiency and practical power output. The expansion of steam-powered railways and automated cotton mills catalyzed global trade and modern industrial development.`
   };
 
-  /* ================= Toast Notification ================= */
+  /**
+   * Displays a temporary notification badge on the screen.
+   * @param {string} message - Notification text.
+   * @param {'info' | 'success' | 'error'} type - Message tone.
+   */
   function showToast(message, type = "info") {
     const toast = document.createElement("div");
     toast.className = `toast ${type}`;
@@ -84,7 +107,9 @@
     }, 2800);
   }
 
-  /* ================= Tab Switching ================= */
+  // ============================================================================
+  // Tab Switching Handlers
+  // ============================================================================
   tabText.addEventListener("click", () => {
     tabText.classList.add("active");
     tabPdf.classList.remove("active");
@@ -103,7 +128,9 @@
     textTabContent.hidden = true;
   });
 
-  /* ================= Word & Character Stats ================= */
+  /**
+   * Recalculates real-time word count and character count for text input.
+   */
   function updateTextStats() {
     const val = textInput.value;
     const words = val.trim() ? val.trim().split(/\s+/).length : 0;
@@ -119,7 +146,9 @@
     updateTextStats();
   });
 
-  /* ================= Quick Sample Loader ================= */
+  // ============================================================================
+  // Sample Ingestion Handlers
+  // ============================================================================
   document.querySelectorAll(".sample-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       const sampleKey = btn.dataset.sample;
@@ -132,12 +161,13 @@
     });
   });
 
-  /* ================= Range Slider ================= */
   numQuestionsInput.addEventListener("input", (e) => {
     numBadge.textContent = e.target.value;
   });
 
-  /* ================= Mode Chips ================= */
+  // ============================================================================
+  // Display Mode Filters (MCQ vs Q&A)
+  // ============================================================================
   document.querySelectorAll(".mode-chip input").forEach(radio => {
     radio.addEventListener("change", (e) => {
       document.querySelectorAll(".mode-chip").forEach(c => c.classList.remove("active"));
@@ -164,7 +194,9 @@
     });
   }
 
-  /* ================= Highlight Answer Helper ================= */
+  // ============================================================================
+  // Target Keyword Highlight Helper
+  // ============================================================================
   hlBtn.addEventListener("click", () => {
     const start = textInput.selectionStart;
     const end = textInput.selectionEnd;
@@ -184,7 +216,9 @@
     showToast(`Marked "${sel}" as target answer.`, "info");
   });
 
-  /* ================= PDF Upload & Preview ================= */
+  // ============================================================================
+  // PDF Drag & Drop Ingestion Handlers
+  // ============================================================================
   pdfDropzone.addEventListener("dragover", (e) => {
     e.preventDefault();
     pdfDropzone.classList.add("dragover");
@@ -213,6 +247,10 @@
     }
   });
 
+  /**
+   * Uploads the selected PDF to /preview-pdf to obtain immediate text and structural metadata.
+   * @param {File} file - The uploaded PDF file.
+   */
   async function handlePdfSelection(file) {
     uploadedPdfFile = file;
     pdfName.textContent = file.name;
@@ -249,7 +287,9 @@
     pdfPreviewText.textContent = "";
   });
 
-  /* ================= Question Generation ================= */
+  // ============================================================================
+  // Question Generation Request Pipeline
+  // ============================================================================
   generateBtn.addEventListener("click", generateQuestions);
 
   textInput.addEventListener("keydown", (e) => {
@@ -258,6 +298,9 @@
     }
   });
 
+  /**
+   * Gathers inputs, toggles loader state, and triggers /generate POST request.
+   */
   async function generateQuestions() {
     const textVal = textInput.value.trim();
     if (!textVal && !uploadedPdfFile) {
@@ -268,7 +311,6 @@
     const num = parseInt(numQuestionsInput.value, 10) || 5;
     const diff = diffInput.value || "medium";
 
-    // Set UI to loading state (Clean, no multi-step scanning animation)
     setLoadingState(true);
 
     const form = new FormData();
@@ -303,6 +345,10 @@
     }
   }
 
+  /**
+   * Toggles the UI between active generation and idle states.
+   * @param {boolean} isLoading - Current loading status.
+   */
   function setLoadingState(isLoading) {
     if (isLoading) {
       emptyPlaceholder.hidden = true;
@@ -332,7 +378,9 @@
     showToast(msg, "error");
   }
 
-  /* ================= Render Quiz Results ================= */
+  // ============================================================================
+  // Quiz Rendering Engine
+  // ============================================================================
   function renderQuizResults() {
     quizDisplayContainer.innerHTML = "";
     errorBox.hidden = true;
@@ -354,7 +402,7 @@
       card.dataset.qid = q.id || qNum;
       card.dataset.correctIdx = q.correct_index !== undefined ? q.correct_index : 0;
 
-      // Question Header
+      // Question Title and Copy Button
       const cardTop = document.createElement("div");
       cardTop.className = "card-top";
       cardTop.innerHTML = `
@@ -366,7 +414,7 @@
       `;
       card.appendChild(cardTop);
 
-      // Multiple Choice Options
+      // Options List (Multiple Choice)
       if (q.options && q.options.length) {
         const optionsGrid = document.createElement("div");
         optionsGrid.className = "options-grid";
@@ -386,7 +434,7 @@
         card.appendChild(optionsGrid);
       }
 
-      // Answer Drawer
+      // Answer Drawer / Context Accordion
       const answerDrawer = document.createElement("div");
       answerDrawer.className = "answer-drawer";
       answerDrawer.innerHTML = `
@@ -411,7 +459,7 @@
       quizDisplayContainer.appendChild(card);
     });
 
-    // Copy handlers
+    // Copy Question Text Handlers
     document.querySelectorAll(".btn-card-copy").forEach(btn => {
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -420,14 +468,18 @@
       });
     });
 
-    // Apply active filter
     const activeChip = document.querySelector(".mode-chip.active input");
     if (activeChip) applyDisplayModeFilter(activeChip.value);
   }
 
-  /* ================= Interactive Evaluation ================= */
+  // ============================================================================
+  // Interactive Evaluation & Self-Grading Engine
+  // ============================================================================
   submitQuizBtn.addEventListener("click", evaluateQuiz);
 
+  /**
+   * Evaluates user-selected radio choices against correct indices and computes percentage.
+   */
   function evaluateQuiz() {
     let score = 0;
     const total = currentQuestions.length;
@@ -455,7 +507,6 @@
         allOptionItems[correctIdx].classList.add("correct-answer");
       }
 
-      // Show answer details
       const answerBox = card.querySelector(".answer-box");
       if (answerBox) answerBox.hidden = false;
       const revealBtn = card.querySelector(".answer-header-btn span");
@@ -495,7 +546,9 @@
     showToast("Quiz reset.", "info");
   });
 
-  /* ================= View Modes ================= */
+  // ============================================================================
+  // View Modes & Answer Toggles
+  // ============================================================================
   viewInteractive.addEventListener("click", () => {
     viewInteractive.classList.add("active");
     viewStudy.classList.remove("active");
@@ -511,7 +564,6 @@
     document.querySelectorAll(".answer-header-btn span").forEach(el => el.textContent = "Hide Answer");
   });
 
-  /* ================= Toggle Answers ================= */
   toggleAnswersBtn.addEventListener("click", () => {
     allAnswersVisible = !allAnswersVisible;
     document.querySelectorAll(".answer-box").forEach(el => {
@@ -523,7 +575,9 @@
     toggleAnswersBtn.querySelector("span").textContent = allAnswersVisible ? "Hide Answers" : "Show Answers";
   });
 
-  /* ================= Export Tools ================= */
+  // ============================================================================
+  // Document Export Handlers (Clipboard, PDF, JSON)
+  // ============================================================================
   copyAllBtn.addEventListener("click", () => {
     if (!currentQuestions.length) return;
     const optLetters = ["A", "B", "C", "D"];
@@ -617,7 +671,9 @@
     showToast("JSON file exported.", "info");
   });
 
-  /* ================= Help Modal ================= */
+  // ============================================================================
+  // Modal Guide & Utilities
+  // ============================================================================
   helpBtn.addEventListener("click", () => helpModal.showModal());
   closeHelpBtn.addEventListener("click", () => helpModal.close());
   helpModal.addEventListener("click", (e) => {
@@ -634,6 +690,6 @@
       .replace(/'/g, "&#039;");
   }
 
-  // Init
+  // Initial execution
   updateTextStats();
 })();
