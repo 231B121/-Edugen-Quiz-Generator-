@@ -1,6 +1,18 @@
-Flask>=2.0
-transformers>=4.0
-torch>=1.7
-PyPDF2>=3.0
+# ==============================================================================
+# EDUGEN Project Dependencies
+# Core libraries for AI question generation, web service, and PDF parsing
+# ==============================================================================
+
+# Web Framework and Production WSGI Server
+Flask>=2.0.0
+gunicorn>=21.0.0
+
+# Natural Language Processing & Transformers
+transformers>=4.20.0
 sentencepiece>=0.1.98
-gunicorn>=21.0
+
+# Deep Learning Computation Engine (PyTorch CPU/CUDA)
+torch>=1.12.0
+
+# Document Ingestion & PDF Extraction
+PyPDF2>=3.0.0
