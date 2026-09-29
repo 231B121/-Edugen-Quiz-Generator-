@@ -1,12 +1,43 @@
+# ==========================================
+# Python Bytecode and Build Artifacts
+# ==========================================
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
+build/
+dist/
+*.egg-info/
+
+# ==========================================
+# Virtual Environments
+# ==========================================
 .env
 .venv
 env/
 venv/
 ENV/
+env.bak/
+venv.bak/
+
+# ==========================================
+# Machine Learning & Cache Artifacts
+# ==========================================
+.cache/
+huggingface/
+checkpoints/
+
+# ==========================================
+# IDE and Editor Configurations
+# ==========================================
 .idea/
 .vscode/
 *.swp
+*.swo
+*~
+
+# ==========================================
+# Operating System Files
+# ==========================================
+.DS_Store
+Thumbs.db
