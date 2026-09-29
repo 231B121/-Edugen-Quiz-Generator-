@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EDUGEN · Quiz & Question Generator</title>
+  <meta name="description" content="Professional AI-assisted Quiz and Question Generator from text and PDF documents." />
+
+  <!-- Google Fonts: Inter for clean, formal academic typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- App Stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="app-layout">
+    
+    <!-- Top Header -->
+    <header class="top-nav">
+      <div class="nav-brand">
+        <div class="brand-logo">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>EDUGEN</h1>
+          <p class="brand-sub">Question & Quiz Generation Platform</p>
+        </div>
+      </div>
+
+      <div class="nav-badges">
+        <span class="badge badge-subtle">T5 NLP Engine</span>
+        <span class="badge badge-subtle">Text & PDF</span>
+        <button id="help_btn" class="btn-secondary-action" title="User Guide" aria-label="Help">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span>User Guide</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Studio Grid -->
+    <main class="studio-container">
+      
+      <!-- LEFT PANEL: Input Source & Configuration -->
+      <section class="panel input-studio" aria-label="Input Configuration">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Source Material</h2>
+            <span class="panel-subtitle">Enter source text or upload a document</span>
+          </div>
+
+          <!-- Input Mode Tabs -->
+          <div class="segmented-control" role="tablist">
+            <button id="tab_text" class="segment-btn active" role="tab" aria-selected="true">Text Input</button>
+            <button id="tab_pdf" class="segment-btn" role="tab" aria-selected="false">Upload PDF</button>
+          </div>
+        </div>
+
+        <!-- TAB 1: TEXT AREA -->
+        <div id="text_tab_content" class="tab-pane active">
+          <div class="quick-samples">
+            <span class="sample-label">Sample topics:</span>
+            <button class="sample-btn" data-sample="ai" type="button">Artificial Intelligence</button>
+            <button class="sample-btn" data-sample="solar" type="button">Solar System</button>
+            <button class="sample-btn" data-sample="history" type="button">History</button>
+          </div>
+
+          <div class="textarea-wrapper">
+            <textarea id="text_input" placeholder="Paste your study notes, article excerpt, or textbook chapter here...&#10;&#10;Optional: Highlight any specific word or phrase and click 'Highlight Answer' below to target questions on that keyword."></textarea>
+            <div class="textarea-footer">
+              <div class="counts">
+                <span id="word_count">0 words</span> · <span id="char_count">0 characters</span>
+              </div>
+              <button id="clear_btn" class="btn-text" type="button">Clear text</button>
+            </div>
+          </div>
+
+          <div class="text-actions-bar">
+            <button id="hl_btn" class="btn-secondary-action" type="button" title="Select a term and click to mark it as the target answer">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 11-6 6v3h3l6-6"/><path d="m22 2-2.7 2.7a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0L25 5z"/></svg>
+              <span>Highlight Selection as Answer</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- TAB 2: PDF UPLOAD -->
+        <div id="pdf_tab_content" class="tab-pane" hidden>
+          <div id="pdf_dropzone" class="dropzone">
+            <input id="pdf_file" type="file" accept="application/pdf" class="file-input-hidden" />
+            <div class="dropzone-icon">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/>
+              </svg>
+            </div>
+            <p class="drop-title">Select or drag PDF file here</p>
+            <p class="drop-sub">Compatible with standard searchable PDF documents</p>
+          </div>
+
+          <!-- PDF Preview info card -->
+          <div id="pdf_info_card" class="file-info-card" hidden>
+            <div class="file-info-header">
+              <div class="file-meta">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <div>
+                  <h4 id="pdf_name" class="file-name">document.pdf</h4>
+                  <p id="pdf_stats" class="file-size">0 pages · 0 words</p>
+                </div>
+              </div>
+              <button id="remove_pdf_btn" class="btn-text danger" title="Remove PDF" type="button">Remove</button>
+            </div>
+
+            <details class="pdf-preview-accordion">
+              <summary>View Extracted Text</summary>
+              <div id="pdf_preview_text" class="preview-box"></div>
+            </details>
+          </div>
+        </div>
+
+        <hr class="divider" />
+
+        <!-- Quiz Options -->
+        <div class="controls-section">
+          <h3 class="section-title">Quiz Settings</h3>
+
+          <div class="controls-grid">
+            <!-- Number of Questions -->
+            <div class="control-card">
+              <div class="control-label-row">
+                <label for="num_questions" class="control-label">Number of Questions</label>
+                <span id="num_badge" class="count-pill">5</span>
+              </div>
+              <input id="num_questions" type="range" min="1" max="15" value="5" step="1" class="custom-range" />
+              <div class="range-markers">
+                <span>1</span><span>5</span><span>10</span><span>15</span>
+              </div>
+            </div>
+
+            <!-- Difficulty -->
+            <div class="control-card">
+              <label for="difficulty" class="control-label">Difficulty</label>
+              <select id="difficulty" class="styled-select">
+                <option value="easy">Easy (Direct factual)</option>
+                <option value="medium" selected>Medium (Standard)</option>
+                <option value="hard">Hard (Analytical)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Display Mode -->
+          <div class="mode-select-wrap">
+            <label class="control-label">Question Format</label>
+            <div class="mode-toggle-group">
+              <label class="mode-chip active">
+                <input type="radio" name="display_mode" value="all" checked />
+                <span>Multiple Choice & Q&A</span>
+              </label>
+              <label class="mode-chip">
+                <input type="radio" name="display_mode" value="mcq" />
+                <span>Multiple Choice Only</span>
+              </label>
+              <label class="mode-chip">
+                <input type="radio" name="display_mode" value="qa" />
+                <span>Q&A Only</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Generate Button -->
+        <button id="generate_btn" class="btn-primary" type="button">
+          <span class="btn-content">Generate Questions</span>
+          <span class="btn-loader" hidden>
+            <span class="clean-spinner-small"></span>
+            Generating...
+          </span>
+        </button>
+
+        <p class="keyboard-hint">Keyboard shortcut: <kbd>Ctrl</kbd> + <kbd>Enter</kbd></p>
+      </section>
+
+      <!-- RIGHT PANEL: Generated Questions & Practice Area -->
+      <section class="panel results-studio" aria-label="Generated Quiz">
+        
+        <!-- Results Header Bar -->
+        <div class="results-top-bar">
+          <div>
+            <h2 class="panel-title">Generated Questions</h2>
+            <div id="results_meta_badge" class="meta-tag" hidden>0 questions generated</div>
+          </div>
+
+          <div id="results_action_buttons" class="results-actions" hidden>
+            <button id="toggle_answers_btn" class="btn-secondary-action" type="button">
+              <span>Show Answers</span>
+            </button>
+            <button id="copy_all_btn" class="btn-secondary-action" type="button">
+              <span>Copy All</span>
+            </button>
+            <button id="export_pdf_btn" class="btn-secondary-action" type="button">
+              <span>Export PDF</span>
+            </button>
+            <button id="export_json_btn" class="btn-secondary-action" type="button">
+              <span>JSON</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mode Tabs: Interactive vs Review -->
+        <div id="view_tabs" class="view-tab-bar" hidden>
+          <button id="view_interactive" class="view-tab active" type="button">Interactive Quiz Mode</button>
+          <button id="view_study" class="view-tab" type="button">Answer Key & Review</button>
+        </div>
+
+        <!-- Score Banner for Interactive Mode -->
+        <div id="quiz_score_banner" class="score-banner" hidden>
+          <div class="score-badge">
+            <span class="score-label">Score</span>
+            <span id="score_value" class="score-number">0 / 0</span>
+          </div>
+          <div class="score-message-wrap">
+            <h4 id="score_headline">Quiz Completed</h4>
+            <p id="score_subtext">Review the answer breakdown below.</p>
+          </div>
+          <button id="retry_quiz_btn" class="btn-secondary-action" type="button">Reset Quiz</button>
+        </div>
+
+        <!-- Content Display Area -->
+        <div class="results-content-area">
+          
+          <!-- STATE 1: Empty Placeholder -->
+          <div id="empty_placeholder" class="empty-state">
+            <div class="empty-icon-wrap">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10M7 12h10M7 16h6"/>
+              </svg>
+            </div>
+            <h3>No Questions Generated Yet</h3>
+            <p>Paste text or upload a PDF document on the left panel, configure your preferences, and click <strong>Generate Questions</strong>.</p>
+          </div>
+
+          <!-- STATE 2: Clean, Simple Minimalist Loader (No scanning animation) -->
+          <div id="loader" class="simple-loader" hidden>
+            <div class="clean-spinner"></div>
+            <p class="loader-text">Generating questions, please wait...</p>
+          </div>
+
+          <!-- STATE 3: Error Banner -->
+          <div id="error_box" class="error-banner" hidden>
+            <div class="error-content">
+              <h4>Notice</h4>
+              <p id="error_message">An error occurred while generating questions.</p>
+            </div>
+          </div>
+
+          <!-- STATE 4: Questions Container -->
+          <div id="quiz_display_container" class="questions-container" hidden>
+            <!-- Question cards rendered dynamically -->
+          </div>
+
+          <!-- Submit Interactive Quiz Button -->
+          <div id="quiz_submit_row" class="quiz-submit-bar" hidden>
+            <button id="submit_quiz_btn" class="btn-primary" type="button">
+              Submit Quiz & Evaluate
+            </button>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Help & Guide Modal -->
+    <dialog id="help_modal" class="modal-dialog">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>User Guide</h3>
+          <button id="close_help_btn" class="btn-close" type="button">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="guide-item">
+            <h4>1. Input Format</h4>
+            <p>Provide informational text with clear facts, definitions, and concepts. Both direct text entry and standard searchable PDF uploads are supported.</p>
+          </div>
+          <div class="guide-item">
+            <h4>2. Targeted Questions (Highlight Tool)</h4>
+            <p>To produce a question on a specific term, select the text in the input box and click <strong>"Highlight Selection as Answer"</strong>.</p>
+          </div>
+          <div class="guide-item">
+            <h4>3. Multiple Choice Practice</h4>
+            <p>In <strong>Interactive Quiz Mode</strong>, select an option for each question and click <strong>"Submit Quiz & Evaluate"</strong> for automatic scoring.</p>
+          </div>
+          <div class="guide-item">
+            <h4>4. Export Options</h4>
+            <p>Use <strong>Export PDF</strong> to download a clean, printable worksheet with an answer key, or <strong>Copy All</strong> for Markdown/Word.</p>
+          </div>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- Toast Notifications -->
+    <div id="toast_container" class="toast-stack" aria-live="polite"></div>
+
+  </div>
+
+  <!-- html2pdf for client-side PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-YcsIPx3f+I9S8rK7Zn5bGgNx7g9a3qO3m4cNx6JzvQp5sWm0p4hAzV3gZ6K1l7y9Qz6r+0u4v3+6uJ5y5yq2EA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <!-- App Script -->
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
