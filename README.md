@@ -213,7 +213,7 @@ http://127.0.0.1:5000
 ## 👨‍💻 Author
 
 **Gourav Ojha**  
-GitHub: [@231B121](https://github.com/231B121) / [@gurjha14-lang](https://github.com/gurjha14-lang)
+GitHub: [@231B121](https://github.com/231B121) / 
 
 ---
 
