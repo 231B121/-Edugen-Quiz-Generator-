@@ -1098,3 +1098,27 @@ kbd {
     grid-template-columns: 1fr;
   }
 }
+
+/* ================= Print Stylesheet ================= */
+@media print {
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .top-nav, .input-studio, .results-actions, .view-tab-bar, .quiz-submit-bar, .toast-stack {
+    display: none !important;
+  }
+  .studio-container {
+    display: block !important;
+  }
+  .panel {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+  .question-card {
+    page-break-inside: avoid;
+    border: 1px solid #ccc !important;
+    margin-bottom: 12px !important;
+  }
+}
